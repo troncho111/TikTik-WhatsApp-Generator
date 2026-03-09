@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTik - ניהול משתמשים</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;"><h1>🎫 TikTik - ניהול</h1></a>
+            <nav class="nav-links">
+                <span class="username">שלום, {{ username }}</span>
+                <a href="{{ url_for('index') }}" class="btn btn-small">🏠 ראשי</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-small btn-outline">התנתק</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="admin-section google-section">
+            <h2>📊 חיבור Google Sheets</h2>
+            <div class="connection-status">
+                <div id="connectionStatus" class="status-box">
+                    <span class="status-icon">⏳</span>
+                    <span class="status-text">בודק חיבור...</span>
+                </div>
+                <div class="connection-buttons">
+                    <button id="checkConnectionBtn" class="btn btn-primary">בדוק חיבור</button>
+                    <a href="https://replit.com" target="_blank" class="btn btn-outline" id="reconnectHelpBtn" style="display:none;">חבר מחדש (Replit)</a>
+                </div>
+                <p class="connection-help" id="connectionHelp" style="display:none;">
+                    אם החיבור לא עובד, לחץ על "חבר מחדש" ובחר Google Sheets מתוך הכלים.
+                </p>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h2>👥 ניהול משתמשים</h2>
+            
+            <div class="add-user-form">
+                <h3>הוסף משתמש חדש</h3>
+                <div class="form-row">
+                    <input type="text" id="newUsername" placeholder="שם משתמש">
+                    <input type="password" id="newPassword" placeholder="סיסמה">
+                    <button id="addUserBtn" class="btn btn-primary">הוסף משתמש</button>
+                </div>
+                <div id="addUserMessage" class="message hidden"></div>
+            </div>
+
+            <div class="users-list">
+                <h3>רשימת משתמשים</h3>
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>שם משתמש</th>
+                            <th>תפקיד</th>
+                            <th>פעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        {% for user in users %}
+                        <tr data-username="{{ user.username }}">
+                            <td>{{ user.username }}</td>
+                            <td>{{ 'אדמין' if user.role == 'admin' else 'נציג' }}</td>
+                            <td>
+                                {% if user.role != 'admin' %}
+                                <button class="btn btn-danger btn-small delete-user-btn">מחק</button>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 TikTik - www.tiktik-online.co.il</p>
+    </footer>
+
+    <script>
+        async function checkGoogleConnection() {
+            const statusBox = document.getElementById('connectionStatus');
+            const helpText = document.getElementById('connectionHelp');
+            const reconnectBtn = document.getElementById('reconnectHelpBtn');
+            
+            statusBox.innerHTML = '<span class="status-icon">⏳</span><span class="status-text">בודק חיבור...</span>';
+            statusBox.className = 'status-box checking';
+            
+            try {
+                const response = await fetch('/api/check_google_connection');
+                const data = await response.json();
+                
+                if (data.connected) {
+                    statusBox.innerHTML = '<span class="status-icon">✅</span><span class="status-text">' + data.message + '</span>';
+                    statusBox.className = 'status-box connected';
+                    helpText.style.display = 'none';
+                    reconnectBtn.style.display = 'none';
+                } else {
+                    statusBox.innerHTML = '<span class="status-icon">❌</span><span class="status-text">' + data.error + '</span>';
+                    statusBox.className = 'status-box disconnected';
+                    helpText.style.display = 'block';
+                    reconnectBtn.style.display = 'inline-block';
+                }
+            } catch (error) {
+                statusBox.innerHTML = '<span class="status-icon">❌</span><span class="status-text">שגיאה בבדיקת החיבור</span>';
+                statusBox.className = 'status-box disconnected';
+                helpText.style.display = 'block';
+                reconnectBtn.style.display = 'inline-block';
+            }
+        }
+        
+        document.getElementById('checkConnectionBtn').addEventListener('click', checkGoogleConnection);
+        checkGoogleConnection();
+
+        document.getElementById('addUserBtn').addEventListener('click', async function() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const messageDiv = document.getElementById('addUserMessage');
+            
+            if (!username || !password) {
+                messageDiv.textContent = 'נא למלא את כל השדות';
+                messageDiv.className = 'message error';
+                messageDiv.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/add_user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    messageDiv.textContent = data.message;
+                    messageDiv.className = 'message success';
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
+                    location.reload();
+                } else {
+                    messageDiv.textContent = data.error;
+                    messageDiv.className = 'message error';
+                }
+                messageDiv.classList.remove('hidden');
+            } catch (error) {
+                messageDiv.textContent = 'שגיאה בהוספת משתמש';
+                messageDiv.className = 'message error';
+                messageDiv.classList.remove('hidden');
+            }
+        });
+
+        document.querySelectorAll('.delete-user-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const row = this.closest('tr');
+                const username = row.dataset.username;
+                
+                if (!confirm(`האם אתה בטוח שברצונך למחוק את המשתמש ${username}?`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/delete_user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        row.remove();
+                    } else {
+                        alert(data.error);
+                    }
+                } catch (error) {
+                    alert('שגיאה במחיקת משתמש');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
