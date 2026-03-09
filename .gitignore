@@ -1,0 +1,14 @@
+__pycache__/
+  *.py[cod]
+  *.pyo
+  .env
+  *.lock
+  .pythonlibs/
+  node_modules/
+  .cache/
+  .config/
+  .upm/
+  .replit
+  .local/
+  attached_assets/
+  
