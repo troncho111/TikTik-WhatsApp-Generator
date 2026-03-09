@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTik - מערכת כרטיסים</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;"><h1>TikTik</h1></a>
+            <nav class="nav-links">
+                <span class="username">שלום, {{ username }}</span>
+                <a href="{{ url_for('admin') }}" class="btn btn-small">ניהול</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-small btn-outline">התנתק</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="search-section">
+            <h2>חיפוש הזמנה</h2>
+            <div class="search-box">
+                <input type="text" id="orderNumber" placeholder="הזן מספר הזמנה..." autocomplete="off">
+                <button id="searchBtn" class="btn btn-primary">חפש</button>
+                <button id="clearBtn" class="btn btn-outline">נקה</button>
+            </div>
+            <div class="custom-name-box">
+                <label for="customName">שם לקוח (אופציונלי):</label>
+                <input type="text" id="customName" placeholder="הזן שם להודעה במקום מספר הזמנה..." autocomplete="off">
+            </div>
+            <div class="options-box">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="includeMap">
+                    <span>הוסף מפת אצטדיון להודעה</span>
+                </label>
+            </div>
+            <div class="language-selector">
+                <span class="language-label">סוג ההודעה:</span>
+                <div class="language-buttons">
+                    <button type="button" class="lang-btn active" data-lang="he">עברית</button>
+                    <button type="button" class="lang-btn" data-lang="en">English</button>
+                    <button type="button" class="lang-btn" data-lang="supplier">Suppliers</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading hidden">
+            <div class="spinner"></div>
+            <p>מחפש...</p>
+        </div>
+
+        <div id="errorMessage" class="error-message hidden"></div>
+
+        <div id="resultSection" class="result-section hidden">
+            <div id="alreadySentWarning" class="already-sent-warning hidden">
+                <span class="warning-icon">⚠️</span>
+                <span class="warning-text">שים לב! הכרטיסים האלה כבר נשלחו בעבר</span>
+            </div>
+            <div class="result-header">
+                <h3>תוצאות עבור: <span id="customerName"></span></h3>
+                <p id="gameName" class="game-name"></p>
+            </div>
+
+            <div class="stadium-map">
+                <img src="{{ url_for('static', filename='stadium_map.png') }}" alt="מפת אצטדיון" onerror="this.style.display='none'">
+            </div>
+
+            <div class="tickets-info">
+                <h4>פרטי כרטיסים:</h4>
+                <div id="ticketsList"></div>
+            </div>
+
+            <div class="quick-links-section">
+                <h4>לינקים להעתקה מהירה:</h4>
+                <div id="quickLinksList"></div>
+                <div class="quick-links-buttons">
+                    <button id="copyAllLinksBtn" class="btn btn-outline-primary">העתק את כל הלינקים</button>
+                    <button id="downloadAllZipBtn" class="btn btn-download">פתח את כל הלינקים 🔗</button>
+                </div>
+            </div>
+
+            <div class="message-preview">
+                <h4>הודעת WhatsApp:</h4>
+                <pre id="messagePreview"></pre>
+            </div>
+
+            <div class="action-buttons">
+                <button id="copyBtn" class="btn btn-success">העתק הודעה</button>
+                <button id="whatsappBtn" class="btn btn-whatsapp">שלח בווטסאפ</button>
+                <button id="markSentBtn" class="btn btn-sent">סמן כנשלח ✓</button>
+            </div>
+            <div id="sentConfirmation" class="sent-confirmation hidden">
+                <span class="sent-icon">✅</span>
+                <span class="sent-text">הכרטיסים סומנו כנשלחו!</span>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 TikTik - www.tiktik-online.co.il</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
