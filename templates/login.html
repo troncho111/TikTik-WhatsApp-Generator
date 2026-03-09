@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTik - התחברות</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <h1>🎫 TikTik</h1>
+                <p>מערכת ייצור הודעות כרטיסים</p>
+            </div>
+            
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="form-group">
+                    <label for="username">שם משתמש</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">סיסמה</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full">התחבר</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
